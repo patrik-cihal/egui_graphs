@@ -91,25 +91,26 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
 
             node_draw_fn: default_node_draw,
             edge_draw_fn: default_edges_draw,
-            node_detect_fn: Self::node_detect,
+            node_detect_fn: default_node_detect,
 
             #[cfg(feature = "events")]
             events_publisher: Default::default(),
         }
     }
 
-    /// Sets a function that will be called instead of the default drawer for every node to draw custom shapes.
+    /// Changes the fucntion that will be called by the drawer for every node.
     pub fn with_custom_node_draw(mut self, func: FnNodeDraw<N, E, Ty>) -> Self {
         self.node_draw_fn = func;
         self
     }
 
-    /// Sets a function that will be called instead of the default drawer for every pair of nodes connected with edges to draw custom shapes.
+    /// Changes the function that will be called by the drawer for every pair of nodes connected with edges.
     pub fn with_custom_edge_draw(mut self, func: FnEdgeDraw<N, E, Ty>) -> Self {
         self.edge_draw_fn = func;
         self
     }
 
+    /// Changes the function that will be called for detecting whether a given node has been clicked.
     pub fn with_custom_node_detect(mut self, func: FnNodeDetect<N>) -> Self {
         self.node_detect_fn = func;
         self
@@ -466,8 +467,9 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
             sender.send(event).unwrap();
         }
     }
-    fn node_detect(meta: &Metadata, n: &Node<N>, pos_in_graph: Vec2, settings_style: &SettingsStyle) -> bool {
-        let dist_to_node = (n.location() - pos_in_graph).length();
-        dist_to_node <= n.screen_radius(meta, &settings_style) / meta.zoom
-    }
+}
+
+fn default_node_detect<N: Clone>(meta: &Metadata, n: &Node<N>, pos_in_graph: Vec2, settings_style: &SettingsStyle) -> bool {
+    let dist_to_node = (n.location() - pos_in_graph).length();
+    dist_to_node <= n.screen_radius(meta, &settings_style) / meta.zoom
 }
