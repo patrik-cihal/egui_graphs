@@ -35,6 +35,7 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> Graph<N, E, Ty> {
         self.g.node_references()
     }
 
+
     /// Provides iterator over all edges and their indices.
     pub fn edges_iter(&'a self) -> impl Iterator<Item = (EdgeIndex, &Edge<E>)> {
         self.g.edge_references().map(|e| (e.id(), e.weight()))
