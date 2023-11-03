@@ -9,7 +9,7 @@ description = "Interactive graph visualization widget for rust powered by egui"
 edition = "2021"
 
 [dependencies]
-egui = "0.23"
+egui = { version = "0.23", features = ["serde"] }
 rand = "0.8"
 petgraph = { version = "0.6", features = ["serde-1", "serde", "serde_derive"] }
 crossbeam = { version = "0.8", optional = true }

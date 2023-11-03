@@ -1,11 +1,12 @@
 use egui::{Color32, Context, Vec2};
+use serde::{Deserialize, Serialize};
 
 use crate::{metadata::Metadata, ComputedNode, SettingsStyle};
 
 use super::StyleNode;
 
 /// Stores properties of a node.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Node<N: Clone> {
     /// Client data
     data: Option<N>,

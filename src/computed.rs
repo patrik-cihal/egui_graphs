@@ -1,5 +1,6 @@
 use egui::{Rect, Vec2};
 use petgraph::{stable_graph::NodeIndex, EdgeType};
+use serde::{Deserialize, Serialize};
 
 use crate::{Graph, Node, SettingsStyle};
 
@@ -76,7 +77,7 @@ impl ComputedState {
     }
 }
 
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct ComputedNode {
     pub num_connections: usize,
 }

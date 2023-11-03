@@ -1,9 +1,10 @@
 use egui::{Color32, Context};
+use serde::{Deserialize, Serialize};
 
 use super::StyleEdge;
 
 /// Stores properties of an edge that can be changed. Used to apply changes to the graph.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Edge<E: Clone> {
     /// Client data
     data: Option<E>,
