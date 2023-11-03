@@ -5,16 +5,19 @@ use crate::events::{
 };
 use crate::{
     computed::ComputedState,
-    draw::{Drawer, FnCustomEdgeDraw, FnCustomNodeDraw},
+    draw::{Drawer, FnEdgeDraw, FnNodeDraw},
     metadata::Metadata,
     settings::SettingsNavigation,
     settings::{SettingsInteraction, SettingsStyle},
-    Graph,
+    Graph, Node, default_node_draw, default_edges_draw,
 };
 #[cfg(feature = "events")]
 use crossbeam::channel::Sender;
 use egui::{Pos2, Rect, Response, Sense, Ui, Vec2, Widget};
 use petgraph::{stable_graph::NodeIndex, EdgeType};
+
+pub type FnNodeDetect<N> =
+    fn(&Metadata, &Node<N>, Vec2, &SettingsStyle) -> bool;
 
 /// Widget for visualizing and interacting with graphs.
 ///
@@ -37,8 +40,9 @@ pub struct GraphView<'a, N: Clone, E: Clone, Ty: EdgeType> {
     settings_style: SettingsStyle,
     g: &'a mut Graph<N, E, Ty>,
 
-    custom_edge_draw: Option<FnCustomEdgeDraw<N, E, Ty>>,
-    custom_node_draw: Option<FnCustomNodeDraw<N, E, Ty>>,
+    edge_draw_fn: FnEdgeDraw<N, E, Ty>,
+    node_draw_fn: FnNodeDraw<N, E, Ty>,
+    node_detect_fn: FnNodeDetect<N>,
 
     #[cfg(feature = "events")]
     events_publisher: Option<&'a Sender<Event>>,
@@ -62,8 +66,8 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> Widget for &mut GraphView<'a, N, E, T
             self.g,
             &self.settings_style,
             &meta,
-            self.custom_node_draw,
-            self.custom_edge_draw,
+            self.node_draw_fn,
+            self.edge_draw_fn,
         )
         .draw();
 
@@ -85,8 +89,9 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
             settings_interaction: Default::default(),
             settings_navigation: Default::default(),
 
-            custom_node_draw: Default::default(),
-            custom_edge_draw: Default::default(),
+            node_draw_fn: default_node_draw,
+            edge_draw_fn: default_edges_draw,
+            node_detect_fn: Self::node_detect,
 
             #[cfg(feature = "events")]
             events_publisher: Default::default(),
@@ -94,14 +99,19 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
     }
 
     /// Sets a function that will be called instead of the default drawer for every node to draw custom shapes.
-    pub fn with_custom_node_draw(mut self, func: FnCustomNodeDraw<N, E, Ty>) -> Self {
-        self.custom_node_draw = Some(func);
+    pub fn with_custom_node_draw(mut self, func: FnNodeDraw<N, E, Ty>) -> Self {
+        self.node_draw_fn = func;
         self
     }
 
     /// Sets a function that will be called instead of the default drawer for every pair of nodes connected with edges to draw custom shapes.
-    pub fn with_custom_edge_draw(mut self, func: FnCustomEdgeDraw<N, E, Ty>) -> Self {
-        self.custom_edge_draw = Some(func);
+    pub fn with_custom_edge_draw(mut self, func: FnEdgeDraw<N, E, Ty>) -> Self {
+        self.edge_draw_fn = func;
+        self
+    }
+
+    pub fn with_custom_node_detect(mut self, func: FnNodeDetect<N>) -> Self {
+        self.node_detect_fn = func;
         self
     }
 
@@ -175,8 +185,8 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
         }
 
         let node = self
-            .g
-            .node_by_screen_pos(meta, &self.settings_style, resp.hover_pos().unwrap());
+            .node_by_screen_pos(meta, resp.hover_pos().unwrap());
+
         if node.is_none() {
             // click on empty space
             let selectable = self.settings_interaction.selection_enabled
@@ -243,8 +253,8 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
 
         if resp.drag_started() {
             if let Some((idx, _)) =
-                self.g
-                    .node_by_screen_pos(meta, &self.settings_style, resp.hover_pos().unwrap())
+                self
+                    .node_by_screen_pos(meta, resp.hover_pos().unwrap())
             {
                 self.set_drag_start(idx);
             }
@@ -263,6 +273,18 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
             let n_idx = comp.dragged.unwrap();
             self.set_drag_end(n_idx);
         }
+    }
+
+    /// Finds node by position. Can be optimized by using a spatial index like quad-tree if needed.
+    pub fn node_by_screen_pos(
+        &self,
+        meta: &'a Metadata,
+        screen_pos: Pos2,
+    ) -> Option<(NodeIndex, &Node<N>)> {
+        let pos_in_graph = (screen_pos.to_vec2() - meta.pan) / meta.zoom;
+        self.g.nodes_iter().find(|(_, n)| {
+            (self.node_detect_fn)(meta, n, pos_in_graph, &self.settings_style)
+        })
     }
 
     fn fit_to_screen(&self, rect: &Rect, meta: &mut Metadata, comp: &ComputedState) {
@@ -443,5 +465,9 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
         if let Some(sender) = self.events_publisher {
             sender.send(event).unwrap();
         }
+    }
+    fn node_detect(meta: &Metadata, n: &Node<N>, pos_in_graph: Vec2, settings_style: &SettingsStyle) -> bool {
+        let dist_to_node = (n.location() - pos_in_graph).length();
+        dist_to_node <= n.screen_radius(meta, &settings_style) / meta.zoom
     }
 }

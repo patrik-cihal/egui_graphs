@@ -36,7 +36,7 @@ impl App for BasicApp {
                         let rad = n.screen_radius(state.meta, state.style);
 
                         // first create rect shape
-                        let size = Vec2::new(rad * 1.5, rad * 1.5);
+                        let size = Vec2::new(rad * 10., rad * 8.);
                         let rect = Rect::from_center_size(node_center_loc, size);
                         let shape_rect = Shape::rect_stroke(
                             rect,
@@ -50,11 +50,7 @@ impl App for BasicApp {
                         // then create label
                         let color = ctx.style().visuals.text_color();
                         let galley = ctx.fonts(|f| {
-                            f.layout_no_wrap(
-                                n.label(),
-                                FontId::new(rad, FontFamily::Monospace),
-                                color,
-                            )
+                            f.layout(n.label(), FontId::new(rad, FontFamily::Monospace), color, size.x)
                         });
 
                         // we need to offset label by half its size to place it in the center of the rect

@@ -6,7 +6,7 @@ use petgraph::{stable_graph::NodeIndex, EdgeType};
 use crate::{settings::SettingsStyle, Edge, Graph, Metadata};
 
 use super::{
-    custom::{FnCustomEdgeDraw, FnCustomNodeDraw, WidgetState},
+    custom::{FnEdgeDraw, FnNodeDraw, WidgetState},
     default_edges_draw, default_node_draw,
     layers::Layers,
 };
@@ -21,8 +21,8 @@ pub struct Drawer<'a, N: Clone, E: Clone, Ty: EdgeType> {
     style: &'a SettingsStyle,
     meta: &'a Metadata,
 
-    custom_node_draw: Option<FnCustomNodeDraw<N, E, Ty>>,
-    custom_edge_draw: Option<FnCustomEdgeDraw<N, E, Ty>>,
+    node_draw_fn: FnNodeDraw<N, E, Ty>,
+    edge_draw_fn: FnEdgeDraw<N, E, Ty>,
 }
 
 impl<'a, N: Clone, E: Clone, Ty: EdgeType> Drawer<'a, N, E, Ty> {
@@ -31,16 +31,16 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> Drawer<'a, N, E, Ty> {
         g: &'a Graph<N, E, Ty>,
         style: &'a SettingsStyle,
         meta: &'a Metadata,
-        custom_node_draw: Option<FnCustomNodeDraw<N, E, Ty>>,
-        custom_edge_draw: Option<FnCustomEdgeDraw<N, E, Ty>>,
+        node_draw_fn: FnNodeDraw<N, E, Ty>,
+        edge_draw_fn: FnEdgeDraw<N, E, Ty>,
     ) -> Self {
         Drawer {
             g,
             p,
             style,
             meta,
-            custom_node_draw,
-            custom_edge_draw,
+            node_draw_fn,
+            edge_draw_fn
         }
     }
 
@@ -61,9 +61,8 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> Drawer<'a, N, E, Ty> {
         };
         self.g
             .nodes_iter()
-            .for_each(|(_, n)| match self.custom_node_draw {
-                Some(f) => f(self.p.ctx(), n, state, l),
-                None => default_node_draw(self.p.ctx(), n, state, l),
+            .for_each(|(_, n)| {
+                (self.node_draw_fn)(self.p.ctx(), n, state, l)
             });
     }
 
@@ -84,9 +83,8 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> Drawer<'a, N, E, Ty> {
 
         edge_map
             .into_iter()
-            .for_each(|((start, end), edges)| match self.custom_edge_draw {
-                Some(f) => f(self.p.ctx(), (start, end), edges, state, l),
-                None => default_edges_draw(self.p.ctx(), (start, end), edges, state, l),
-            });
+            .for_each(|((start, end), edges)| 
+                (self.edge_draw_fn)(self.p.ctx(), (start, end), edges, state, l)
+            );
     }
 }
