@@ -4,7 +4,7 @@ mod edge;
 mod layers;
 mod node;
 
-pub use self::custom::{FnEdgeDraw, FnNodeDraw};
+pub use self::custom::{FnEdgeDraw, FnNodeDraw, WidgetState};
 pub use self::drawer::Drawer;
 pub use self::edge::default_edges_draw;
 pub use self::layers::Layers;

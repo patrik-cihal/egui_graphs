@@ -8,7 +8,7 @@ mod settings;
 mod transform;
 
 pub use self::computed::ComputedNode;
-pub use self::draw::{default_edges_draw, default_node_draw, FnEdgeDraw, FnNodeDraw};
+pub use self::draw::{default_edges_draw, default_node_draw, FnEdgeDraw, FnNodeDraw, WidgetState};
 pub use self::elements::{Edge, Node};
 pub use self::graph::Graph;
 pub use self::graph_view::GraphView;
