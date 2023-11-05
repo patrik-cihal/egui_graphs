@@ -13,12 +13,10 @@ egui = { version = "0.23", features = ["serde"] }
 rand = "0.8"
 petgraph = { version = "0.6", features = ["serde-1", "serde", "serde_derive"] }
 crossbeam = { version = "0.8", optional = true }
-serde = { version = "1.0", features = ["derive"], optional = true }
-serde_json = { version = "1.0", optional = true }
+serde = { version = "1.0", features = ["derive"] }
 
 [features]
-egui_persistence = ["dep:serde"]
-events = ["dep:serde", "dep:serde_json", "dep:crossbeam"]
+events = ["dep:crossbeam"]
 
 [workspace]
 members = ["examples/*"]
