@@ -445,20 +445,20 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
         self.publish_event(Event::NodeDragEnd(PayloadNodeDragEnd { id: idx.index() }));
     }
 
-    fn set_pan(&self, val: Vec2, meta: &mut Metadata) {
-        let diff = val - meta.pan;
-        meta.pan = val;
+    fn set_pan(&self, new_pan: Vec2, meta: &mut Metadata) {
+        let diff = new_pan - meta.pan;
+        meta.pan = new_pan;
 
         #[cfg(feature = "events")]
-        self.publish_event(Event::Pan(PayloadPan { diff: diff.into(), new_pos: val.into() }));
+        self.publish_event(Event::Pan(PayloadPan { diff: diff.into(), new_pan: new_pan.into() }));
     }
 
-    fn set_zoom(&self, val: f32, meta: &mut Metadata) {
-        let diff = val - meta.zoom;
-        meta.zoom = val;
+    fn set_zoom(&self, new_zoom: f32, meta: &mut Metadata) {
+        let diff = new_zoom - meta.zoom;
+        meta.zoom = new_zoom;
 
         #[cfg(feature = "events")]
-        self.publish_event(Event::Zoom(PyaloadZoom { diff }));
+        self.publish_event(Event::Zoom(PyaloadZoom { diff, new_zoom }));
     }
 
     #[cfg(feature = "events")]
