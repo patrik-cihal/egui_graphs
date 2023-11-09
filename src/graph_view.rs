@@ -450,7 +450,7 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
         meta.pan = val;
 
         #[cfg(feature = "events")]
-        self.publish_event(Event::Pan(PayloadPan { diff: diff.into() }));
+        self.publish_event(Event::Pan(PayloadPan { diff: diff.into(), new_pos: val.into() }));
     }
 
     fn set_zoom(&self, val: f32, meta: &mut Metadata) {
