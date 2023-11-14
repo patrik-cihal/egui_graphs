@@ -7,12 +7,12 @@ use super::StyleEdge;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Edge<E: Clone> {
     /// Client data
-    data: Option<E>,
+    data: E,
 
     style: StyleEdge,
 }
 
-impl<E: Clone> Default for Edge<E> {
+impl<E: Clone+Default> Default for Edge<E> {
     fn default() -> Self {
         Self {
             style: Default::default(),
@@ -25,18 +25,20 @@ impl<E: Clone> Default for Edge<E> {
 impl<E: Clone> Edge<E> {
     pub fn new(data: E) -> Self {
         Self {
-            data: Some(data),
+            data,
+            style: Default::default()
+        }
+    }
 
-            ..Default::default()
+    pub fn map_data<NE: Clone, F: Fn(E) -> NE>(self, f: F) -> Edge<NE> {
+        Edge {
+            data: (f)(self.data),
+            style: self.style
         }
     }
 
     pub fn tip_angle(&self) -> f32 {
         self.style.tip_angle
-    }
-
-    pub fn data(&self) -> Option<&E> {
-        self.data.as_ref()
     }
 
     pub fn color(&self, ctx: &Context) -> Color32 {

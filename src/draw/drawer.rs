@@ -7,7 +7,6 @@ use crate::{settings::SettingsStyle, Edge, Graph, Metadata};
 
 use super::{
     custom::{FnEdgeDraw, FnNodeDraw, WidgetState},
-    default_edges_draw, default_node_draw,
     layers::Layers,
 };
 

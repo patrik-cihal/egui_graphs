@@ -1,12 +1,10 @@
-use egui::Pos2;
-
 use petgraph::{
     stable_graph::{EdgeIndex, EdgeReference, NodeIndex, StableGraph},
     visit::{EdgeRef, IntoEdgeReferences, IntoNodeReferences},
     Direction, EdgeType,
 };
 
-use crate::{metadata::Metadata, transform, Edge, Node, SettingsStyle};
+use crate::{transform, Edge, Node};
 
 /// Graph type compatible with [`super::GraphView`].
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

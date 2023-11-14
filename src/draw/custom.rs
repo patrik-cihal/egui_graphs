@@ -1,4 +1,4 @@
-use egui::{Context, Vec2};
+use egui::Context;
 use petgraph::{stable_graph::NodeIndex, EdgeType};
 
 use crate::{Edge, Graph, Metadata, Node, SettingsStyle};
