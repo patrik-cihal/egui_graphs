@@ -43,7 +43,7 @@ pub fn default_node_draw<N: Clone, E: Clone, Ty: EdgeType>(
     let label_size = rad;
     let galley = ctx.fonts(|f| {
         f.layout_no_wrap(
-            n.label(),
+            n.label().to_string(),
             FontId::new(label_size, FontFamily::Monospace),
             color,
         )

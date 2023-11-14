@@ -9,7 +9,7 @@ use super::StyleNode;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Node<N: Clone> {
     /// Client data
-    data: Option<N>,
+    pub data: N,
 
     location: Vec2,
 
@@ -26,7 +26,7 @@ impl<N: Clone> Node<N> {
     pub fn new(location: Vec2, data: N) -> Self {
         Self {
             location,
-            data: Some(data),
+            data,
             style: Default::default(),
             label: Default::default(),
             selected: Default::default(),
@@ -61,22 +61,13 @@ impl<N: Clone> Node<N> {
         self.computed = comp;
     }
 
-    pub fn data(&self) -> Option<&N> {
-        self.data.as_ref()
-    }
-
-    pub fn data_mut(&mut self) -> Option<&mut N> {
-        self.data.as_mut()
-    }
-
-    pub fn set_data(&mut self, data: Option<N>) {
+    pub fn set_data(&mut self, data: N) {
         self.data = data;
     }
 
-    pub fn with_data(&self, data: Option<N>) -> Self {
-        let mut res = self.clone();
-        res.data = data;
-        res
+    pub fn with_data(mut self, data: N) -> Self {
+        self.data = data;
+        self
     }
 
     pub fn location(&self) -> Vec2 {
@@ -99,18 +90,17 @@ impl<N: Clone> Node<N> {
         self.dragged
     }
 
+    pub fn label(&self) -> &str {
+        &self.label
+    }
+
     pub fn set_dragged(&mut self, dragged: bool) {
         self.dragged = dragged;
     }
 
-    pub fn label(&self) -> String {
-        self.label.clone()
-    }
-
-    pub fn with_label(&mut self, label: String) -> Self {
-        let mut res = self.clone();
-        res.label = label;
-        res
+    pub fn with_label(mut self, label: String) -> Self {
+        self.label = label;
+        self
     }
 
     pub fn color(&self, ctx: &Context) -> Color32 {
@@ -123,5 +113,17 @@ impl<N: Clone> Node<N> {
         }
 
         ctx.style().visuals.widgets.inactive.fg_stroke.color
+    }
+
+    pub fn map_data<NN: Clone, F: Fn(N) -> NN>(self, f: F) -> Node<NN> {
+        Node {
+            location: self.location,
+            data: (f)(self.data),
+            label: self.label,
+            computed: self.computed,
+            style: self.style,
+            selected: self.selected,
+            dragged: self.dragged,
+        }
     }
 }
