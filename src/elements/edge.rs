@@ -7,7 +7,7 @@ use super::StyleEdge;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Edge<E: Clone> {
     /// Client data
-    data: E,
+    pub data: E,
 
     style: StyleEdge,
 }
