@@ -1,5 +1,5 @@
 [package]
-name = "egui_graphs"
+name = "egui_graphs_v1"
 version = "0.15.0"
 authors = ["Dmitrii Samsonov <blitzarx1@gmail.com>"]
 license = "MIT"
