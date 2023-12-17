@@ -346,7 +346,7 @@ impl<'a, N: Clone, E: Clone, Ty: EdgeType> GraphView<'a, N, E, Ty> {
                 return;
             }
 
-            let step = self.settings_navigation.zoom_speed * (1.-delta).signum();
+            let step = self.settings_navigation.zoom_speed * (delta-1.).signum();
             self.zoom(&resp.rect, step, i.pointer.hover_pos(), meta);
         });
     }
